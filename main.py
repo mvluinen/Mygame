@@ -42,6 +42,7 @@ monkey_1_5 = Monkey(1,  5,  1e12,)
 
 # print(f"monkey amount 1.1 = {monkey_1_1.amount}")
 
+
 def text_out(line):
     screen.blit(
         pygame.font.Font(None, line.font_size)
@@ -67,7 +68,7 @@ while running:
     if keys[pygame.K_1]:
         # check money and buy delay of 10 ticks
         if (cash > monkey_1_1.price and
-            tick_counter - 10 > monkey_1_1.last_tick):
+                tick_counter - 10 > monkey_1_1.last_tick):
 
             monkey_1_1.amount += 1
             textlines.Monkey1_1_head.set_output(monkey_1_1.amount)
@@ -82,7 +83,7 @@ while running:
     if keys[pygame.K_2]:
         # check money and buy delay of 10 ticks
         if (cash > monkey_1_2.price and
-            tick_counter - 10 > monkey_1_2.last_tick):
+                tick_counter - 10 > monkey_1_2.last_tick):
 
             monkey_1_2.amount += 1
             textlines.Monkey1_2_head.set_output(monkey_1_2.amount)
