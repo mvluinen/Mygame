@@ -5,23 +5,15 @@
 
 # imports
 import pygame
+from vars import (
+   FPS,
+   BGCOLOR,
+   tick_counter,
+   cash
+)
+from textlines import text_lines
+import textlines
 
-# init
-START_CASH = 10
-START_MONKEY_1_1 = 30
-START_MONKEY_1_1_PRICE = 10
-
-START_MONKEY_1_2 = 0
-START_MONKEY_1_2_PRICE = 1000
-
-# start new save
-cash = START_CASH
-monkey_1_1 = START_MONKEY_1_1
-monkey_1_1_price = START_MONKEY_1_1_PRICE
-monkey_1_1_last_tick = 0
-monkey_1_2 = START_MONKEY_1_2
-monkey_1_2_price = START_MONKEY_1_2_PRICE
-monkey_1_2_last_tick = 0
 
 # set up pygame
 pygame.init()
@@ -29,27 +21,32 @@ screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
 
-# constants
-FPS = 30
-TEXT_COLOR = "#FFFF00"
-BGCOLOR = "#001f24"
-FONT_1 = pygame.font.Font(None, 64)
-FONT_2 = pygame.font.Font(None, 32)
 
-# vars
-tick = 1
+class Monkey:
+    def __init__(self, prestige, tier, price, amount=0, last_tick=0):
+        self.prestige = prestige
+        self.tier = tier
+        self.price = price
+        self.amount = amount
+        self.last_tick = last_tick
+        self.name = f"monkey_{prestige}_{tier}"
+        self.head = f"{self.name}_head"
+        self.buy = f"{self.name}_buy"
 
 
+monkey_1_1 = Monkey(1,  1,  1e1,    30)
+monkey_1_2 = Monkey(1,  2,  1e3,)
+monkey_1_3 = Monkey(1,  3,  1e6,)
+monkey_1_4 = Monkey(1,  4,  1e9,)
+monkey_1_5 = Monkey(1,  5,  1e12,)
 
+# print(f"monkey amount 1.1 = {monkey_1_1.amount}")
 
-def text_out(text_line):
-    text = texts[text_line]['text']
-    position = texts[text_line]['position']
-    font_size = texts[text_line]['font_size']
-    output = (pygame.font.Font(None, font_size)
-              .render(text, True, TEXT_COLOR)
-              )
-    screen.blit(output, position)
+def text_out(line):
+    screen.blit(
+        pygame.font.Font(None, line.font_size)
+        .render(line.output, True, line.color),
+        line.position)
     return
 
 
@@ -62,55 +59,55 @@ while running:
     # fill the screen with a color to wipe away anything from last frame
     screen.fill(BGCOLOR)
 
-    texts = {
-        'cash': {'text': f"Cash: ${cash}",
-                 'position': (750, 10),
-                 'font_size': 64},
-        'monkey1_1': {'text': f"Tier 1_1 monkeys: {monkey_1_1}",
-                      'position': (100, 100),
-                      'font_size': 64},
-        'monkey1_1_buy': {'text': f"Press 1 to buy: ${monkey_1_1_price}",
-                          'position': (100, 150),
-                          'font_size': 32},
-        'monkey1_2': {'text': f"Tier 1_2 monkeys: {monkey_1_2}",
-                      'position': (100, 250),
-                      'font_size': 64},
-        'monkey1_2_buy': {'text': f"Press 2 to buy: ${monkey_1_2_price}",
-                          'position': (100, 300),
-                          'font_size': 32},
-            }
-
-    for line in texts:
-        text_out(line)
+    for line in text_lines:
+        text_out(line.get_class())
 
     # interaction by player
     keys = pygame.key.get_pressed()
     if keys[pygame.K_1]:
         # check money and buy delay of 10 ticks
-        if cash > monkey_1_1_price and tick - 10 > monkey_1_1_last_tick:
-            monkey_1_1 += 1
-            cash = round(cash - monkey_1_1_price, 2)
-            monkey_1_1_price = round(pow(monkey_1_1_price, 1.03), 2)
-            monkey_1_1_last_tick = tick
+        if (cash > monkey_1_1.price and
+            tick_counter - 10 > monkey_1_1.last_tick):
+
+            monkey_1_1.amount += 1
+            textlines.Monkey1_1_head.set_output(monkey_1_1.amount)
+
+            cash = round(cash - monkey_1_1.price, 2)
+            textlines.Cash.set_output(cash)
+
+            monkey_1_1.price = round(pow(monkey_1_1.price, 1.03), 2)
+            textlines.Monkey1_1_buy.set_output(monkey_1_1.price)
+            monkey_1_1.last_tick = tick_counter
 
     if keys[pygame.K_2]:
-        if cash > monkey_1_2_price and tick - 10 > monkey_1_2_last_tick:
-            monkey_1_2 += 1
-            cash = round(cash - monkey_1_2_price, 2)
-            monkey_1_2_price = round(pow(monkey_1_2_price, 1.03), 2)
-            monkey_1_2_last_tick = tick
+        # check money and buy delay of 10 ticks
+        if (cash > monkey_1_2.price and
+            tick_counter - 10 > monkey_1_2.last_tick):
+
+            monkey_1_2.amount += 1
+            textlines.Monkey1_2_head.set_output(monkey_1_2.amount)
+
+            cash = round(cash - monkey_1_2.price, 2)
+            textlines.Cash.set_output(cash)
+
+            monkey_1_2.price = round(pow(monkey_1_2.price, 1.03), 2)
+            textlines.Monkey1_2_buy.set_output(monkey_1_2.price)
+            monkey_1_2.last_tick = tick_counter
 
     # calc next tick
-    if tick % 15 == 0:
-        monkey_1_1 = round(monkey_1_1 + monkey_1_2, 0)
-    if tick % 10 == 0:
-        cash = round(cash + monkey_1_1, 2)
+    if tick_counter % 15 == 0:
+        monkey_1_1.amount = round(monkey_1_1.amount + monkey_1_2.amount, 0)
+        textlines.Monkey1_1_head.set_output(monkey_1_1.amount)
+    if tick_counter % 10 == 0:
+        cash = round(cash + monkey_1_1.amount, 2)
+        textlines.Cash.set_output(cash)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
 
     # limits FPS to fps
     clock.tick(FPS)
-    tick += 1
+    tick_counter += 1
 
+# print(textlines.Cash.get_class().output)
 pygame.quit()
